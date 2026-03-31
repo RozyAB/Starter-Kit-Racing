@@ -1,4 +1,4 @@
-extends Node3D
+class_name Vehicle extends Node3D
 
 # Nodes
 
@@ -8,17 +8,19 @@ extends Node3D
 # Vehicle elements
 
 @onready var vehicle_model = $Container
-@onready var vehicle_body = $Container/Model/body
+@onready var vehicle_body = get_node_or_null("Container/Model/body")
 
-@onready var wheel_fl = $"Container/Model/wheel-front-left"
-@onready var wheel_fr = $"Container/Model/wheel-front-right"
-@onready var wheel_bl = $"Container/Model/wheel-back-left"
-@onready var wheel_br = $"Container/Model/wheel-back-right"
+# (Optional) wheels
+
+@onready var wheel_fl = get_node_or_null("Container/Model/wheel-front-left")
+@onready var wheel_fr = get_node_or_null("Container/Model/wheel-front-right")
+@onready var wheel_bl = get_node_or_null("Container/Model/wheel-back-left")
+@onready var wheel_br = get_node_or_null("Container/Model/wheel-back-right")
 
 # Effects
 
-@onready var trail_left: GPUParticles3D = $Container/TrailLeft
-@onready var trail_right: GPUParticles3D = $Container/TrailRight
+@onready var trail_left = get_node_or_null("Container/TrailLeft")
+@onready var trail_right = get_node_or_null("Container/TrailRight")
 
 # Sounds
 
@@ -37,6 +39,12 @@ var colliding: bool
 
 var linear_velocity: Vector3
 var prev_position: Vector3
+
+var calculated_lean: float
+
+# Public Functions
+
+func get_vehicle_position() -> Vector3: return vehicle_model.global_position
 
 # Functions
 
@@ -58,7 +66,7 @@ func _physics_process(delta):
 
 	if raycast.is_colliding():
 		if !colliding:
-			vehicle_body.position = Vector3(0, 0.1, 0) # Bounce
+			if vehicle_body != null: vehicle_body.position = Vector3(0, 0.1, 0) # Bounce
 			input.z = 0
 
 		normal = raycast.get_collision_normal()
@@ -111,27 +119,30 @@ func handle_input(delta):
 	sphere.angular_velocity += vehicle_model.get_global_transform().basis.x * (linear_speed * 100) * delta
 
 func effect_body(delta):
-
-	# Slightly tilt body based on acceleration and steering
-
-	vehicle_body.rotation.x = lerp_angle(vehicle_body.rotation.x, -(linear_speed - acceleration) / 6, delta * 10)
-	vehicle_body.rotation.z = lerp_angle(vehicle_body.rotation.z, -input.x / 5 * linear_speed, delta * 5)
-
-	# Change the body position so wheels don't clip through the body when tilting
-
-	vehicle_body.position = vehicle_body.position.lerp(Vector3(0, 0.2, 0), delta * 5)
-
+	
+	calculated_lean = lerp_angle(calculated_lean, -input.x / 5 * linear_speed, delta * 5)
+	
+	# Slightly tilt (and move) body based on acceleration and steering
+	
+	if vehicle_body != null:
+		
+		vehicle_body.rotation.x = lerp_angle(vehicle_body.rotation.x, -(linear_speed - acceleration) / 6, delta * 10)
+		vehicle_body.rotation.z = calculated_lean
+		
+		vehicle_body.position = vehicle_body.position.lerp(Vector3(0, 0.2, 0), delta * 5)
+	
 func effect_wheels(delta):
 
 	# Rotate wheels based on acceleration
 
 	for wheel in [wheel_fl, wheel_fr, wheel_bl, wheel_br]:
-		wheel.rotation.x += acceleration
+		if wheel != null:
+			wheel.rotation.x += acceleration
 
 	# Rotate front wheels based on steering direction
 
-	wheel_fl.rotation.y = lerp_angle(wheel_fl.rotation.y, -input.x / 1.5, delta * 10)
-	wheel_fr.rotation.y = lerp_angle(wheel_fr.rotation.y, -input.x / 1.5, delta * 10)
+	if wheel_fl != null: wheel_fl.rotation.y = lerp_angle(wheel_fl.rotation.y, -input.x / 1.5, delta * 10)
+	if wheel_fr != null: wheel_fr.rotation.y = lerp_angle(wheel_fr.rotation.y, -input.x / 1.5, delta * 10)
 
 # Engine sounds
 
@@ -152,11 +163,11 @@ func effect_engine(delta):
 
 func effect_trails():
 
-	var drift_intensity = abs(linear_speed - acceleration) + (abs(vehicle_body.rotation.z) * 2.0)
+	var drift_intensity = abs(linear_speed - acceleration) + (abs(calculated_lean) * 2.0)
 	var should_emit = drift_intensity > 0.25
 
-	trail_left.emitting = should_emit
-	trail_right.emitting = should_emit
+	if trail_left != null: trail_left.emitting = should_emit
+	if trail_right != null: trail_right.emitting = should_emit
 
 	var target_volume = -80.0
 	if should_emit: target_volume = remap(clamp(drift_intensity, 0.25, 2.0), 0.25, 2.0, -10.0, 0.0)
@@ -176,6 +187,9 @@ func align_with_y(xform, new_y):
 # Detect collisions and play impact sound
 
 func _on_sphere_body_entered(_body: Node) -> void:
+	
+	if vehicle_body == null: return
+	
 	if not impact_sound.playing:
 		var impact_velocity := absf(linear_velocity.dot(vehicle_body.global_basis.z))
 		impact_sound.volume_db = clampf(remap(impact_velocity, 0.0, 6.0, -20.0, 0.0), -20.0, 0.0)
