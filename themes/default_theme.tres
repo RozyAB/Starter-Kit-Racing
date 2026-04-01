@@ -1,0 +1,8 @@
+[gd_resource type="Theme" format=3 uid="uid://b86xt5wo5jirx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mpelh"]
+draw_center = false
+
+[resource]
+Label/colors/font_color = Color(0, 0, 0, 1)
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_mpelh")
