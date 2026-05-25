@@ -8,6 +8,13 @@
 
 config_version=5
 
+[accelbyte]
+
+base_url=""
+namespace=""
+client_id=""
+client_secret=""
+
 [animation]
 
 compatibility/default_parent_skeleton_in_mesh_instance_3d=true
@@ -25,6 +32,7 @@ config/icon="res://icon.png"
 [autoload]
 
 UiManager="*uid://xasnpi2qwlw"
+AccelbyteManager="*uid://dj36vlpavitnj"
 
 [display]
 
