@@ -22,6 +22,65 @@ var _is_polling: bool = false
 var _POOL_INTERVAL_SEC: int = 3
 var _matchmaking_timer: Timer
 
+# Statistics and Leaderboard
+var STAT_CODE_BEST_LAP_TIME = "best-lap-time"
+var leaderboard: LeaderboardService
+var social: SocialService
+const _stat_update_strategy_to_string: Dictionary = {
+	StatUpdateStrategy.OVERRIDE: "OVERRIDE",
+	StatUpdateStrategy.INCREMENT: "INCREMENT",
+	StatUpdateStrategy.MAX: "MAX",
+	StatUpdateStrategy.MIN: "MIN",
+}
+
+## Supported update strategies for stat items.
+enum StatUpdateStrategy {
+	OVERRIDE = 0,
+	INCREMENT,
+	MAX,
+	MIN
+}
+
+## Data structure for a single stat update entry used in bulk updates.
+class BulkStatUpdateData:
+	func _init(
+		_user_id: StringName,
+		_stat_code: String,
+		_update_strategy: StatUpdateStrategy,
+		_value: float
+	) -> void:
+		user_id = _user_id
+		stat_code = _stat_code
+		update_strategy = _update_strategy
+		value = _value
+	
+	var user_id: StringName
+	var stat_code: String
+	var update_strategy: StatUpdateStrategy
+	var value: float
+
+## Data structure for a leaderboard entry returned from ranking queries.
+class LeaderboardData:
+	func _init(
+		_point: float,
+		_user_id: StringName,
+		_hidden: bool
+	) -> void:
+		point = _point
+		user_id = _user_id
+		hidden = _hidden
+	
+	var point: float
+	var user_id: StringName
+	var hidden: bool
+
+## Data structure for the local user's leaderboard ranking, including cycle info.
+class UserLeaderboardRankingData:
+	var point: float
+	var rank: int
+	var hidden: bool
+	var cycle_id: String  # Empty string means all-time ranking
+
 
 #region Overrides
 func _ready():
@@ -51,6 +110,8 @@ func _ready():
 	matchmaking = sdk.get_service(Match2Service)
 	session = sdk.get_service(SessionService)
 	lobby = sdk.get_lobby_ws_service()
+	leaderboard = sdk.get_service(LeaderboardService)
+	social = sdk.get_service(SocialService)
 	
 	# Bind signals.
 	sdk.lobby_connected.connect(_on_lobby_connected)
@@ -371,4 +432,129 @@ func _resolve_session(session_id: StringName):
 		P2PManager.connect_to_host(host_user_id)
 	
 	matchmaking_found.emit()
+#endregion
+
+
+#region Statistics and Leaderboard
+## Update the local (authenticated) user's single stat item value.
+## on_complete(is_succeeded: bool)
+func update_local_user_stat(stat_code: String, update_strategy: StatUpdateStrategy, value: float, on_complete: Callable = Callable()):
+	# Send request.
+	var user_id: String = get_user_id()
+	var body: Dictionary = {
+		"updateStrategy": _stat_update_strategy_to_string[update_strategy],
+		"value": value,
+	}
+	var result: Dictionary = await social.update_user_stat_item_value_1("", stat_code, user_id, "", body)
+	
+	# Response handler.
+	var is_success: bool = result["success"]
+	if not is_success:
+		push_error("[AccelByteManager] update_local_user_stat failed: %s" % str(result))
+	on_complete.call(is_success)
+
+
+## Bulk update stat items for multiple users.
+## on_complete(is_succeeded: bool)
+func update_user_stat(data: Array[BulkStatUpdateData], on_complete: Callable = Callable()):
+	# Send request.
+	var body: Array[Dictionary]
+	for entry in data:
+		body.append({
+			"userId": entry.user_id,
+			"statCode": entry.stat_code,
+			"updateStrategy": _stat_update_strategy_to_string[entry.update_strategy],
+			"value": entry.value,
+		})
+	var result: Dictionary = await social.bulk_update_user_stat_item_1("", body)
+	
+	# Response handler.
+	var is_success: bool = result["success"]
+	if not is_success:
+		push_error("[AccelByteManager] update_user_stat failed: %s" % str(result))
+	on_complete.call(is_success)
+
+
+## Get the local user's ranking from a leaderboard (all-time and cycles).
+## on_complete(data: Array[UserLeaderboardRankingData], is_succeeded: bool)
+func get_local_user_leaderboard_ranking(leaderboard_code: String, on_complete: Callable = Callable()):
+	# Send request.
+	var user_id: String = get_user_id()
+	var result: Dictionary = await leaderboard.get_user_ranking_public_v3(leaderboard_code, "", user_id)
+	
+	# Response handler.
+	var is_success: bool = result["success"]
+	var rankings: Array[UserLeaderboardRankingData]
+	if is_success:
+		var res_data: Dictionary = result["data"]
+		# All-time entry.
+		if res_data.has("allTime"):
+			var entry = UserLeaderboardRankingData.new()
+			entry.point = res_data["allTime"].get("point", 0.0)
+			entry.rank = res_data["allTime"].get("rank", 0)
+			entry.hidden = res_data["allTime"].get("hidden", false)
+			entry.cycle_id = ""
+			rankings.append(entry)
+		# Cycle entries.
+		for cycle in res_data.get("cycles", []):
+			var entry = UserLeaderboardRankingData.new()
+			entry.point = cycle.get("point", 0.0)
+			entry.rank = cycle.get("rank", 0)
+			entry.hidden = cycle.get("hidden", false)
+			entry.cycle_id = cycle.get("cycleId", "")
+			rankings.append(entry)
+	elif result["status_code"] == 404:
+		# Expected error when player doesn't have any stats yet.
+		is_success = true
+		var entry = UserLeaderboardRankingData.new()
+		entry.point = -1.0
+		entry.rank = -1
+		entry.hidden = false
+		entry.cycle_id = ""
+		rankings.append(entry)
+	else:
+		push_error("[AccelByteManager] get_local_user_leaderboard_ranking failed: %s" % str(result))
+	on_complete.call(rankings, is_success)
+
+
+## Get the all-time leaderboard ranking (top N entries).
+## on_complete(data: Array[LeaderboardData], is_succeeded: bool)
+func get_alltime_leaderboard(leaderboard_code: String, limit: int, on_complete: Callable = Callable()):
+	# Send request.
+	var result: Dictionary = await leaderboard.get_all_time_leaderboard_ranking_public_v3(leaderboard_code, "", limit)
+	
+	# Response handler.
+	var is_success: bool = result["success"]
+	var entries: Array[LeaderboardData]
+	if is_success:
+		for item in result["data"].get("data", []):
+			entries.append(LeaderboardData.new(
+				item.get("point", 0.0),
+				item.get("userId", ""),
+				item.get("hidden", false)
+			))
+	else:
+		push_error("[AccelByteManager] get_alltime_leaderboard failed: %s" % str(result))
+	on_complete.call(entries, is_success)
+
+
+## Get a weekly/cycle leaderboard ranking (top N entries for a given cycle).
+## on_complete(data: Array[LeaderboardData], is_succeeded: bool)
+func get_cycle_leaderboard(leaderboard_code: String, cycle_id: String, limit: int, on_complete: Callable = Callable()):
+	# Send request.
+	var result: Dictionary = await leaderboard.get_current_cycle_leaderboard_ranking_public_v3(cycle_id, leaderboard_code, "", limit)
+	
+	# Response handler.
+	var is_success: bool = result["success"]
+	var entries: Array[LeaderboardData]
+	if is_success:
+		for item in result["data"].get("data", []):
+			entries.append(LeaderboardData.new(
+				item.get("point", 0.0),
+				item.get("userId", ""),
+				item.get("hidden", false)
+			))
+	else:
+		push_error("[AccelByteManager] get_cycle_leaderboard failed: %s" % str(result))
+	on_complete.call(entries, is_success)
 #endregion

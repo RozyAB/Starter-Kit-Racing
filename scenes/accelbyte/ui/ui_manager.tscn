@@ -150,10 +150,13 @@ current_tab = 0
 [node name="Alltime" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/TabContainer" unique_id=416829261 instance=ExtResource("4_sem4g")]
 visible = true
 layout_mode = 2
+leaderboard_code = "best-lap-time"
 metadata/_tab_index = 0
 
 [node name="Weekly" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/TabContainer" unique_id=473020198 instance=ExtResource("4_sem4g")]
 layout_mode = 2
+leaderboard_code = "best-lap-time"
+leaderboard_cycle_id = "weekly"
 metadata/_tab_index = 1
 
 [node name="VBoxContainer_Toast" type="VBoxContainer" parent="HBoxContainer" unique_id=1633935653]

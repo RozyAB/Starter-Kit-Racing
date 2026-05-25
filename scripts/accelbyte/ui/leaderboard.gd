@@ -39,6 +39,81 @@ func _setup() -> void:
 	_label.text = "Loading..."
 	_waiting_ranking = true
 	_waiting_leaderboard = true
+	
+	AccelbyteManager.get_local_user_leaderboard_ranking(
+		leaderboard_code,
+		_on_get_local_user_leaderboard_ranking_completed
+	)
+	
+	if leaderboard_cycle_id.is_empty():
+		AccelbyteManager.get_alltime_leaderboard(
+			leaderboard_code,
+			5,
+			_on_get_leaderboard_completed
+		)
+	else:
+		AccelbyteManager.get_cycle_leaderboard(
+			leaderboard_code,
+			leaderboard_cycle_id,
+			5,
+			_on_get_leaderboard_completed
+		)
+
+
+func _on_get_local_user_leaderboard_ranking_completed(
+	data: Array[AccelbyteManager.UserLeaderboardRankingData],
+	is_succeeded: bool
+):
+	_waiting_ranking = false
+	
+	if not is_succeeded:
+		_get_ranking_succeeded = false
+		show_result()
+		return
+	_get_ranking_succeeded = true
+	
+	# Update self ranking.
+	for ranking_data in data:
+		if ranking_data.cycle_id == leaderboard_cycle_id:
+			_self_entry.setup(
+				ranking_data.rank,
+				"%s (you)" % AccelbyteManager.get_user_id(),
+				ranking_data.point
+			)
+			break
+	show_result()
+
+
+func _on_get_leaderboard_completed(
+	data: Array[AccelbyteManager.LeaderboardData],
+	is_succeeded: bool
+):
+	_waiting_leaderboard = false
+	
+	if not is_succeeded:
+		_get_leaderboard_succeeded = false
+		show_result()
+		return
+	_get_leaderboard_succeeded = true
+	
+	# Reset list.
+	for child in _container.get_children():
+		child.queue_free()
+	
+	# Contruct list.
+	for index in range(data.size()):
+		var leaderboard_data = data[index]
+		var entry: LeaderboardEntry = _leaderboard_entry_packed_scene.instantiate()
+		entry.setup(
+			index + 1,
+			"%s%s" % [
+				leaderboard_data.user_id,
+				" (you)" if leaderboard_data.user_id == AccelbyteManager.get_user_id() else ""
+			],
+			leaderboard_data.point
+		)
+		_container.add_child(entry)
+	show_result()
 
 
 func show_result():

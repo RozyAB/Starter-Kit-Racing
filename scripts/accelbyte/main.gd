@@ -253,7 +253,22 @@ func _on_vehicle_passed_finish_line(_vehicle_name: String):
 			return
 	
 	# All players have finished, change state.
-	state = EnumGameState.END
+	if state != EnumGameState.END:
+		state = EnumGameState.END
+		
+		# Update stats.
+		var stat_update_data: Array[AccelbyteManager.BulkStatUpdateData]
+		for user_id in P2PManager.player_data:
+			var it_player_data = get_player_data(user_id)
+			stat_update_data.append(AccelbyteManager.BulkStatUpdateData.new(
+				user_id,
+				AccelbyteManager.STAT_CODE_BEST_LAP_TIME,
+				AccelbyteManager.StatUpdateStrategy.MIN,
+				it_player_data.elapsed_time
+			))
+		AccelbyteManager.update_user_stat(stat_update_data, func(is_succeeded):
+			UiManager.push_toast("Stats update %s" % "complete" if is_succeeded else "fail")
+		)
 
 
 func _on_vehicle_reversed_finish_line(_vehicle_name: String):
