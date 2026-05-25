@@ -39,6 +39,12 @@ func _ready() -> void:
 	# Disable cancel match and leave button by default.
 	_cancel_match_button.disabled = true
 	_leave_game_session_button.disabled = true
+	
+	# Bind matchmaking signals.
+	AccelbyteManager.matchmaking_started.connect(_on_matchmaking_started)
+	AccelbyteManager.matchmaking_failed.connect(_on_matchmaking_failed)
+	AccelbyteManager.matchmaking_found.connect(_on_matchmaking_found)
+	AccelbyteManager.matchmaking_canceled.connect(_on_matchmaking_canceled)
 
 
 func _input(event: InputEvent) -> void:
@@ -89,21 +95,79 @@ func clear_result():
 #endregion
 
 
+#region Matchmaking callbacks
+func _on_matchmaking_started():
+	# UI update.
+	_start_match_button.disabled = true
+	_cancel_match_button.disabled = false
+	_leave_game_session_button.disabled = true
+	push_toast("Looking for match...", true)
+
+
+func _on_matchmaking_failed(reason: String):
+	# UI update.
+	_start_match_button.disabled = false
+	_cancel_match_button.disabled = true
+	clear_persistent()
+	push_toast("Matchmaking failed: %s" % reason)
+
+
+func _on_matchmaking_found():
+	# UI update.
+	_start_match_button.disabled = false
+	_cancel_match_button.disabled = true
+	_leave_game_session_button.disabled = false
+	clear_persistent()
+	
+	# Set game mode as race mode.
+	get_tree().set_meta(Main.PARAM_KEY_GAME_MODE, 1)
+
+
+func _on_matchmaking_canceled():
+	# UI update.
+	_start_match_button.disabled = false
+	_cancel_match_button.disabled = true
+	clear_persistent()
+	push_toast("Matchmaking canceled")
+#endregion
+
+
 func _on_button_close_pressed() -> void:
 	# Hide menu.
 	_menu_container.hide()
 
 
 func _on_button_start_match_pressed() -> void:
-	pass
+	# Disable all matchmaking button.
+	_start_match_button.disabled = true
+	_cancel_match_button.disabled = true
+	
+	AccelbyteManager.start_matchmaking(_matchmaking_pool)
 
 
 func _on_button_cancel_match_pressed() -> void:
-	pass
+	# Disable all matchmaking button.
+	_start_match_button.disabled = true
+	_cancel_match_button.disabled = true
+	
+	AccelbyteManager.cancel_matchmaking()
 
 
 func _on_button_leave_session_pressed() -> void:
-	pass
+	push_toast("Leaving session...", true)
+	AccelbyteManager.leave_game_session(func(succeeded):
+		_leave_game_session_button.disabled = true
+		clear_persistent()
+		push_toast(
+			"Session left" if succeeded else "Failed to leave session"
+		)
+		
+		# Disconnect P2P connection.
+		if P2PManager.is_host:
+			P2PManager.stop_host()
+		else:
+			P2PManager.disconnect_from_host()
+	)
 
 
 func _on_button_copy_id_pressed() -> void:

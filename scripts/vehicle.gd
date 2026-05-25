@@ -53,8 +53,30 @@ func get_vehicle_position() -> Vector3: return vehicle_model.global_position
 func _ready() -> void:
 	# Assume `main` node is always the root.
 	_main = get_tree().current_scene
+	
+	# Setup replicated variables.
+	if P2PManager.is_active() and name == AccelbyteManager.get_user_id():
+		P2PManager.replicate_variables.append_array([
+			P2PManager.ReplicateVariableData.new(self, "input"),
+			P2PManager.ReplicateVariableData.new(self, "acceleration"),
+			P2PManager.ReplicateVariableData.new(self, "linear_velocity"),
+			P2PManager.ReplicateVariableData.new(self, "linear_speed"),
+			P2PManager.ReplicateVariableData.new(self, "position"),
+			P2PManager.ReplicateVariableData.new(self, "rotation"),
+			P2PManager.ReplicateVariableData.new(vehicle_model, "position"),
+			P2PManager.ReplicateVariableData.new(vehicle_model, "rotation"),
+			P2PManager.ReplicateVariableData.new(sphere, "position")
+		])
 
 func _physics_process(delta):
+	
+	# Should only be handled in the authored instance.
+	if P2PManager.is_active() and name != AccelbyteManager.get_user_id():
+		effect_engine(delta)
+		effect_body(delta)
+		effect_wheels(delta)
+		effect_trails()
+		return
 	
 	handle_input(delta)
 	

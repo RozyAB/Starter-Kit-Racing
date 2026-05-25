@@ -33,6 +33,7 @@ config/icon="res://icon.png"
 
 UiManager="*uid://xasnpi2qwlw"
 AccelbyteManager="*uid://dj36vlpavitnj"
+P2PManager="*uid://qrwas0qr8v65"
 
 [display]
 
