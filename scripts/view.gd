@@ -1,3 +1,4 @@
+class_name View
 extends Node3D
 
 @export_group("Properties")
@@ -11,7 +12,8 @@ func _physics_process(delta):
 	
 	# Ease position towards target vehicle position
 	
-	self.position = self.position.lerp(target.get_vehicle_position(), delta * 4)
+	if target != null:
+		self.position = self.position.lerp(target.get_vehicle_position(), delta * 4)
 
 	# Zoom camera based on the speed of the vehicle
 

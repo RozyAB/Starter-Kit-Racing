@@ -42,16 +42,22 @@ var prev_position: Vector3
 
 var calculated_lean: float
 
+var _main: Main
+
 # Public Functions
 
 func get_vehicle_position() -> Vector3: return vehicle_model.global_position
 
 # Functions
 
+func _ready() -> void:
+	# Assume `main` node is always the root.
+	_main = get_tree().current_scene
+
 func _physics_process(delta):
-
+	
 	handle_input(delta)
-
+	
 	var direction = sign(linear_speed)
 	if direction == 0: direction = sign(input.z) if abs(input.z) > 0.1 else 1
 
@@ -111,8 +117,14 @@ func _physics_process(delta):
 # Handle input when vehicle is colliding with ground
 
 func handle_input(delta):
-
-	if raycast.is_colliding():
+	
+	if (
+		_main.game_mode == Main.EnumGameMode.RACE and
+		_main.state == Main.EnumGameState.START
+	):
+		# Prevent input if hasn't start yet.
+		input = Vector3.ZERO
+	elif raycast.is_colliding():
 		input.x = Input.get_axis("left", "right")
 		input.z = Input.get_axis("back", "forward")
 

@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://l3q8h5xod7p7"]
+
+[ext_resource type="Script" uid="uid://b1ootod1yb643" path="res://scripts/accelbyte/start_and_finish_line.gd" id="1_1hd8p"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ebd40"]
+size = Vector3(10, 2, 0.5)
+
+[node name="StartAndFinishLine" type="Node3D" unique_id=1847627486 node_paths=PackedStringArray("_first_area", "_second_area", "_spawns")]
+script = ExtResource("1_1hd8p")
+_first_area = NodePath("Area3D_First")
+_second_area = NodePath("Area3D_Second")
+_spawns = [NodePath("Marker3D"), NodePath("Marker3D2"), NodePath("Marker3D4"), NodePath("Marker3D3")]
+
+[node name="Area3D_First" type="Area3D" parent="." unique_id=1559112510]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.2499998)
+collision_layer = 8
+collision_mask = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D_First" unique_id=1966086808]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.4)
+shape = SubResource("BoxShape3D_ebd40")
+
+[node name="Area3D_Second" type="Area3D" parent="." unique_id=994394670]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.8999999)
+collision_layer = 8
+collision_mask = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D_Second" unique_id=2040369404]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.25)
+shape = SubResource("BoxShape3D_ebd40")
+
+[node name="Marker3D" type="Marker3D" parent="." unique_id=402747780]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0, 1.4)
+
+[node name="Marker3D4" type="Marker3D" parent="." unique_id=728431865]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1, 0, -1.4)
+
+[node name="Marker3D2" type="Marker3D" parent="." unique_id=210442335]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 0, 1.4)
+
+[node name="Marker3D3" type="Marker3D" parent="." unique_id=1074155398]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 0, -1.4)

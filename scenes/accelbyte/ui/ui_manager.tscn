@@ -1,0 +1,167 @@
+[gd_scene format=3 uid="uid://xasnpi2qwlw"]
+
+[ext_resource type="Script" uid="uid://lxkhh6l82eo8" path="res://scripts/accelbyte/ui/ui_manager.gd" id="1_tjxc0"]
+[ext_resource type="PackedScene" uid="uid://lo7xisf12lyo" path="res://scenes/accelbyte/ui/components/notification_toast.tscn" id="2_6neu2"]
+[ext_resource type="PackedScene" uid="uid://b8rgos6p7or7e" path="res://scenes/accelbyte/ui/components/result_entry.tscn" id="3_6neu2"]
+[ext_resource type="PackedScene" uid="uid://dd2jflalaw1jf" path="res://scenes/accelbyte/ui/leaderboard.tscn" id="4_sem4g"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w20mq"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+draw_center = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tjxc0"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(1, 1, 1, 0.4509804)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+shadow_color = Color(0, 0, 0, 0.09803922)
+shadow_size = 2
+
+[node name="UiManager" type="PanelContainer" unique_id=1636386205 node_paths=PackedStringArray("_toast_container", "_menu_container", "_close_menu_button", "label_id", "_start_match_button", "_cancel_match_button", "_leave_game_session_button", "_result_outer")]
+process_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_w20mq")
+script = ExtResource("1_tjxc0")
+_toast_packed_scene = ExtResource("2_6neu2")
+_toast_container = NodePath("HBoxContainer/VBoxContainer_Toast")
+_menu_container = NodePath("HBoxContainer/MarginContainer/PanelContainer_Menu")
+_close_menu_button = NodePath("HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/HBoxContainer3/Button_Close")
+label_id = NodePath("HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer2/Label_Id")
+_matchmaking_pool = &"racing-1v1"
+_start_match_button = NodePath("HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer4/Button_StartMatch")
+_cancel_match_button = NodePath("HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer4/Button_CancelMatch")
+_leave_game_session_button = NodePath("HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer4/Button_LeaveSession")
+_result_outer = NodePath("HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/VBoxContainer_Result")
+_result_entry_packed_scene = ExtResource("3_6neu2")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1893268067]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer" unique_id=65936828]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="PanelContainer_Menu" type="PanelContainer" parent="HBoxContainer/MarginContainer" unique_id=1271103206]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_tjxc0")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MarginContainer/PanelContainer_Menu" unique_id=1320193558]
+layout_mode = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer" unique_id=460056944]
+layout_mode = 2
+
+[node name="Control" type="Control" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/HBoxContainer3" unique_id=1391631991]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/HBoxContainer3" unique_id=1260710411]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 5.0
+text = "MENU"
+horizontal_alignment = 1
+
+[node name="Button_Close" type="Button" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/HBoxContainer3" unique_id=651475039]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Close"
+
+[node name="HSeparator3" type="HSeparator" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer" unique_id=107126402]
+layout_mode = 2
+
+[node name="VBoxContainer_Menu" type="VBoxContainer" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer" unique_id=146705430]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu" unique_id=1277526156]
+layout_mode = 2
+
+[node name="Label_Id" type="Label" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer2" unique_id=1159019325]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 6.0
+
+[node name="Button_CopyId" type="Button" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer2" unique_id=1052190360]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Copy"
+
+[node name="HSeparator5" type="HSeparator" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu" unique_id=502362377]
+layout_mode = 2
+
+[node name="Label4" type="Label" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu" unique_id=1306203980]
+layout_mode = 2
+text = "Matchmaking"
+horizontal_alignment = 1
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu" unique_id=1781221377]
+layout_mode = 2
+
+[node name="Button_StartMatch" type="Button" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer4" unique_id=324987876]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Find Match"
+
+[node name="Button_CancelMatch" type="Button" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer4" unique_id=1185557810]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel Match"
+
+[node name="Button_LeaveSession" type="Button" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer4" unique_id=1118913062]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Leave Session"
+
+[node name="HSeparator4" type="HSeparator" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu" unique_id=73144208]
+layout_mode = 2
+
+[node name="Label5" type="Label" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu" unique_id=1431774888]
+layout_mode = 2
+text = "Result"
+horizontal_alignment = 1
+
+[node name="VBoxContainer_Result" type="VBoxContainer" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu" unique_id=1286676746]
+layout_mode = 2
+
+[node name="HSeparator6" type="HSeparator" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu" unique_id=900142689]
+layout_mode = 2
+
+[node name="TabContainer" type="TabContainer" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu" unique_id=409002986]
+layout_mode = 2
+current_tab = 0
+
+[node name="Alltime" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/TabContainer" unique_id=416829261 instance=ExtResource("4_sem4g")]
+visible = true
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Weekly" parent="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/TabContainer" unique_id=473020198 instance=ExtResource("4_sem4g")]
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="VBoxContainer_Toast" type="VBoxContainer" parent="HBoxContainer" unique_id=1633935653]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="pressed" from="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/HBoxContainer3/Button_Close" to="." method="_on_button_close_pressed"]
+[connection signal="pressed" from="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer2/Button_CopyId" to="." method="_on_button_copy_id_pressed"]
+[connection signal="pressed" from="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer4/Button_StartMatch" to="." method="_on_button_start_match_pressed"]
+[connection signal="pressed" from="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer4/Button_CancelMatch" to="." method="_on_button_cancel_match_pressed"]
+[connection signal="pressed" from="HBoxContainer/MarginContainer/PanelContainer_Menu/VBoxContainer/VBoxContainer_Menu/HBoxContainer4/Button_LeaveSession" to="." method="_on_button_leave_session_pressed"]

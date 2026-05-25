@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://bd2x8nndlyhmd"]
+
+[ext_resource type="Script" uid="uid://mimknls3xo68" path="res://scripts/accelbyte/ui/components/leaderboard_entry.gd" id="1_c5aie"]
+
+[node name="LeaderboardEntry" type="HBoxContainer" unique_id=1533429044 node_paths=PackedStringArray("_label_rank", "_label_name", "_label_time")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_c5aie")
+_label_rank = NodePath("Label_Rank")
+_label_name = NodePath("Label_Name")
+_label_time = NodePath("Label_Time")
+
+[node name="Label_Rank" type="Label" parent="." unique_id=1835106995]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label_Name" type="Label" parent="." unique_id=1564058691]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+
+[node name="Label_Time" type="Label" parent="." unique_id=1341493513]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0

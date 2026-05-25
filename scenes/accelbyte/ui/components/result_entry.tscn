@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://b8rgos6p7or7e"]
+
+[ext_resource type="Script" uid="uid://coyumxpjxko7w" path="res://scripts/accelbyte/ui/components/result_entry.gd" id="1_keekb"]
+
+[node name="ResultEntry" type="HBoxContainer" unique_id=1823025524 node_paths=PackedStringArray("_label_name", "_label_time")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_keekb")
+_label_name = NodePath("Label_Name")
+_label_time = NodePath("Label_Time")
+
+[node name="Label_Name" type="Label" parent="." unique_id=318557487]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "<player_name>"
+
+[node name="Label_Time" type="Label" parent="." unique_id=1867062898]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "mm:ss:ms"
+horizontal_alignment = 2
